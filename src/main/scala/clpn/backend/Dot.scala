@@ -28,7 +28,7 @@ object Dot {
 //          s"""{${stkn},${dtok}}"""
 //      }
       var strPlaces:List[String] = List()
-      for (p <- pls) {
+      for (p <- pls.toList.sorted) {
         var cmrk = mrk.getOrElse(p, (Set(), Set()))
         strPlaces = strPlaces ++ List(toDotMarking(cmrk._1 ++ cmrk._2))
       }// ).mkString(",")
