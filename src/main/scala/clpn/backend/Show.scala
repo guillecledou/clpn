@@ -26,8 +26,11 @@ object Show{
   private def trDelay(delay: Int) =
     if (delay==0) "" else s"(+${delay})"
 
+  private def trName(name: String) =
+    if (name.isEmpty) "" else s" by ${name}"
+
   def apply(tr:Transition) = {
-    s"""${tr.from} -${trDelay(tr.delay)}->${tr.polarity} ${tr.to}"""
+    s"""${tr.from} -${trDelay(tr.delay)}->${tr.polarity} ${tr.to}${trName(tr.name)}"""
   }
 
   def apply(mks:Map[Int, (Set[SToken],Set[DToken])]): String = {
