@@ -10,11 +10,37 @@ object Dot {
     * @param rg reachability graph
     * @return dot graph in string
     */
-  def apply(pn:CLPN,rg:ReachGraph): String = {
+  def apply(clpn:CLPN,rg:ReachGraph): String = {
     "digraph G {\n" +
-      toDotMarkings(pn.pls,rg.m) +
+      toDotMarkings(clpn.pls,rg.m) +
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
       "}"
+  }
+
+  def toDotTransitions(trs: Set[Transition]) = {
+    var tnodes = new StringBuilder
+    var tarcs = new StringBuilder
+    var tname :Int = -1
+    for (t <- trs){
+      var name = if (t.name.isEmpty) {tname+=1; "_t"+tname} else t.name
+      tnodes append
+        s"""{node [label="${name}\\n${t.polarity}${if (t.delay>0) "\\n"+t.delay else ""}",""" +
+        s"""shape="box",width=0.2, height=.4] ${name}}\n"""
+      tarcs append s"""${t.from} -> ${name} -> ${t.to}\n"""
+    }
+    tnodes append tarcs
+  }
+
+//  def mkMarking(tks: (Set[SToken], Set[DToken])) = {
+//    var tokens = tks._1 ++ tk_2
+//
+//  }
+
+  def apply(clpn:CLPN): String = {
+    "digraph G {\n" +
+    "rankdir=LR\n" +
+    clpn.pls.map(p => s"""{node [xlabel="${p}",label=""] ${p}}""").mkString("\n") +
+    "\n" + toDotTransitions(clpn.trs) + "}"
   }
 
   def toDotMarkings(pls:Set[Int],stsMrks:Map[Int,Map[Int,(Set[SToken],Set[DToken])]]):String = {
