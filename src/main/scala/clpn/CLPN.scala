@@ -11,6 +11,7 @@ import clpn.backend.Show
 
 
 case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int,(Set[SToken],Set[DToken])]){
+
   //(pls:Set[Place],tr:Set[Transition],arcs:Set[Arcs])
 
   private def linkT(t:Transition):CLPN =
