@@ -49,22 +49,28 @@ object ReachabilityGraph {
     var nm:Map[Int,(Set[SToken],Set[DToken])] = Map()
 //    var stoken: Set[Token] = Set()
     //var enabledt: Set[Transition] = Set()
-
+    // for each place pl with non-empty marking tks
     for ((pl,tks) <- m; if (m.isDefinedAt(pl))) {
+      // for each outgoing transition from pl
       for (t <- clpn.trs; if (t.from == pl)) {
+        // for each simple token in (TODO:tks)
         for (stk <- m(pl)._1) {
+          // get the current tokens in the target of t
           var ct:(Set[SToken],Set[DToken]) = nm.getOrElse(t.to,(Set(),Set()))
-          var nt = t.fire(stk)
+          //fire t for the simple token
+          var nt = t.fire(stk) // get token to add in target
           nt match {
-            case n:SToken     => nm = nm + (t.to -> (ct._1 ++ Set(n), ct._2))
-            case DToken(tk,d)  => nm = nm + (t.to -> (ct._1 , ct._2 ++ Set(DToken(tk,d))))
+            case n:SToken     => nm = nm + (t.to -> (ct._1 ++ Set(n), ct._2)) // add simple token to target if it is simple
+            case DToken(tk,d)  => nm = nm + (t.to -> (ct._1 , ct._2 ++ Set(DToken(tk,d)))) // add dtoken to target if it is delay
           }
         }
+        // for each delay token in pl // TODO: fix, this has to be conducted once not for very transition (is a waist of computing)
         for (dtk <- m(pl)._2 ) {
+          // get the current token in pl (TODO:this is tks)
           var ct:(Set[SToken],Set[DToken]) = nm.getOrElse(t.from, (Set(), Set()))
           dtk match {
-            case DToken(tk, 1) => nm = nm + (t.from -> (ct._1 ++ Set(tk), ct._2))
-            case DToken(tk, n) => nm = nm + (t.from -> (ct._1, ct._2 ++ Set(DToken(tk, n - 1))))
+            case DToken(tk, 1) => nm = nm + (t.from -> (ct._1 ++ Set(tk), ct._2)) //transform token to active if delay0
+            case DToken(tk, n) => nm = nm + (t.from -> (ct._1, ct._2 ++ Set(DToken(tk, n - 1)))) // decrease the token
           }
         }
       }

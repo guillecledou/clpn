@@ -60,8 +60,8 @@ object BasicExamples {
     3 -->+ 4,
     4 -->+ 5,
     5 -->+ 6,
-    6 -->+ 1,
+    6 -->+ 1 in 2,
     1 -->- 4,
     1 -->+ 6
-  ) //init(Map(1 -> (Set(Inc),Set())))
+  ) init(Map(1 -> (Set(Inc),Set())))
 }
