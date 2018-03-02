@@ -39,7 +39,7 @@ object Dot {
   def apply(clpn:CLPN): String = {
     "digraph G {\n" +
     "rankdir=LR\n" +
-    clpn.pls.map(p => s"""{node [xlabel="${p}",label=""] ${p}}""").mkString("\n") +
+    clpn.pls.map(p => s"""{node [xlabel="${p}",label="",shape="circle"] ${p}}""").mkString("\n") +
     "\n" + toDotTransitions(clpn.trs) + "}"
   }
 

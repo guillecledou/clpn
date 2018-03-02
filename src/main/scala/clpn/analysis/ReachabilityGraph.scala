@@ -80,7 +80,7 @@ object ReachabilityGraph {
 
   def enabled(m:Map[Int,(Set[SToken],Set[DToken])],clpn:CLPN):Set[Transition] = {
     var res:Set[Transition] = Set()
-    for ((pl,tks) <-m; if m.isDefinedAt(pl))
+    for ((pl,tks) <-m; if (m(pl)._1.contains(Inc) || m(pl)._1.contains(Dec)))
       for (t <- clpn.trs; if (t.from == pl)) res += t
     res
   }

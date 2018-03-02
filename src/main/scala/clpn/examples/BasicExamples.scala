@@ -37,20 +37,20 @@ object BasicExamples {
 
   // Net increase
   var neti = newclpn ++ (
-    1 -->+ 2,
-    2 -->+ 1,
-    2 -->- 3,
-    3 -->+ 4,
-    4 -->+ 1
+    1 -->+ 2 by "t1",
+    2 -->+ 1 by "t2",
+    2 -->- 3 by "t3",
+    3 -->+ 4 by "t4",
+    4 -->+ 1 by "t5"
   ) //init(Map(1 -> (Set(Inc),Set())))
 
   // Net increase with delays
   var netid = newclpn ++ (
-    1 -->+ 2 by "ni->ss",
-    2 -->+ 1 by "ss->ni",
-    2 -->- 3 by "ss->ra" in 3,
-    3 -->+ 4 by "ra->fnr" in 2,
-    4 -->+ 1 by "fnr->ni"
+    1 -->+ 2 by "t1",
+    2 -->+ 1 by "t2",
+    2 -->- 3 by "t3" in 1,
+    3 -->+ 4 by "t4" in 1,
+    4 -->+ 1 by "t5"
   ) //init(Map(1 -> (Set(Inc),Set())))
 
   // Overshoot and collapse
