@@ -10,7 +10,7 @@ import clpn.backend.Show
 
 
 
-case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int,(Set[SToken],Set[DToken])]){
+case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(Set[SToken],Set[DToken])]){
 
   private def linkT(t:Transition):CLPN =
     CLPN(pls+t.from+t.to,trs+t,m)
@@ -21,10 +21,10 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int,(Set[SToken],Set[DTo
     res
   }
 
-  private def linkMrks(mk: Map[Int, (Set[SToken], Set[DToken])]) =
-    CLPN(pls,trs,m++mk)
+  private def linkMrks(mk:(Int, PlaceMarking)) = //(Set[SToken], Set[DToken])]) =
+    CLPN(pls,trs,m+(mk._1 -> mk._2))
 
-  def init(mks:Map[Int,(Set[SToken],Set[DToken])]*):CLPN ={
+  def initial(mks:(Int, PlaceMarking)*):CLPN ={ //(Set[SToken],Set[DToken])]*):CLPN ={
     var res = this
     for (mk <- mks) res = res linkMrks mk
     res
@@ -35,13 +35,13 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int,(Set[SToken],Set[DTo
   override def toString: String = Show(this)
 }
 
-//
-//case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
-//
-//  def enabled = st.nonEmpty
-//
-//  def conflicting = st.contains(Inc) && st.contains(Dec)
-//}
+
+case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
+
+  def enabled = st.nonEmpty
+
+  def conflicting = st.contains(Inc) && st.contains(Dec)
+}
 
 
 //case class ReachGraph(sts:Set[Int], tr:Set[(Int,Int)], m:Map[Int,Map[Int,(Set[SToken],Set[DToken])]]){

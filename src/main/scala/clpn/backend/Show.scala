@@ -33,8 +33,12 @@ object Show{
     s"""${tr.from} -${trDelay(tr.delay)}->${tr.polarity} ${tr.to}${trName(tr.name)}"""
   }
 
-  def apply(mks:Map[Int, (Set[SToken],Set[DToken])]): String = {
-    mks.map(mk => mkPlaceMarking(mk._1,mk._2._1,mk._2._2)).mkString("["," | ","]")
+//  def apply(mks:Map[Int, (Set[SToken],Set[DToken])]): String = {
+//    mks.map(mk => mkPlaceMarking(mk._1,mk._2._1,mk._2._2)).mkString("["," | ","]")
+//  }
+
+  def apply(mks:Map[Int,PlaceMarking]):String ={
+    mks.map(mk => mkPlaceMarking(mk._1,mk._2.st,mk._2.dt)).mkString("[","|","]")
   }
 
   def mkPlaceMarking(p:Int, stk:Set[SToken], dtk:Set[DToken]):String = {

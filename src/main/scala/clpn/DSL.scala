@@ -10,6 +10,18 @@ object DSL {
     def -->-(other:Int):Transition = Transition(i,"",Neg,0,other)
   }
 
+  implicit def setTkToPMarking(tks:Set[Token]):PlaceMarking = {
+    var st:Set[SToken] = Set()
+    var dt:Set[DToken] = Set()
+    for (tk <- tks) {
+      tk match {
+        case t:SToken => st + t
+        case t:DToken => dt + t
+      }
+    }
+    new PlaceMarking(st,dt)
+  }
+
   implicit def intToTPlace(i:Int): TPlace = new TPlace(i)
 
   val newclpn = CLPN(Set(),Set(),Map())

@@ -7,17 +7,18 @@ import scala.collection.mutable.ListBuffer
 object ReachabilityGraph {
 
   def apply(clpn:CLPN): ReachGraph = {
-    var sts:Set[Int]= Set(0)
-    var tr:Set[rgTrans] = Set()
-    var cStNewNumber:Int= 0
-    var cMrk = clpn.m
-    var stMrk: Map[Int, Map[Int, (Set[SToken],Set[DToken])]] = Map(0 -> clpn.m)
+    var sts:Set[Int]= Set(0) // set of sates for the the RG, initialy state 0 associated to initial marking
+    var stCounter:Int= 0 // last state id used
+    var tr:Set[rgTrans] = Set() //set fo transitions between states of the RG
+    var cMrk = clpn.m  // current marking
+    var stMrk: Map[Int, Map[Int, PlaceMarking]] = Map(0 -> clpn.m) // mapping between states and markings
+    // list of markings to visit as they are discovered (initially marking associated to state 0)
     var toVisit:ListBuffer[Int] = ListBuffer(0)
-    var newMrk:Set[Map[Int, (Set[SToken],Set[DToken])]] = Set()
-    while (toVisit.nonEmpty) {
-      var st = toVisit.head
-      toVisit = toVisit.drop(1)
-      cMrk = stMrk(st)
+    var newMrk:Set[Map[Int,PlaceMarking]] = Set() // new markings(normalized) discovered after updating cMrk
+    while (toVisit.nonEmpty) { //while there are markings to visit
+      var st = toVisit.head // get the state id  of the marking to visit
+      toVisit = toVisit.drop(1) // remove it from the list
+      cMrk = stMrk(st) // get the marking associated to that state id
       newMrk = update(clpn,cMrk)
       var enabledT = enabled(cMrk,clpn).map(t => t.name).mkString("|")
       for (nm <- newMrk) {
@@ -26,11 +27,11 @@ object ReachabilityGraph {
             tr += rgTrans(st,enabledT,stn)
           }
           case None => {
-            cStNewNumber+=1
-            tr += rgTrans(st,enabledT,cStNewNumber)
-            stMrk += (cStNewNumber -> nm)
-            toVisit += cStNewNumber
-            sts+=cStNewNumber
+            stCounter+=1
+            tr += rgTrans(st,enabledT,stCounter)
+            stMrk += (stCounter -> nm)
+            toVisit += stCounter
+            sts+=stCounter
           }
         }
       }
@@ -38,30 +39,30 @@ object ReachabilityGraph {
     ReachGraph(sts,tr,stMrk)
   }
 
-   def update(clpn:CLPN,m:Map[Int,(Set[SToken],Set[DToken])]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
-    var nm:Map[Int,(Set[SToken],Set[DToken])] = Map()
+   def update(clpn:CLPN,m:Map[Int,PlaceMarking]):Set[Map[Int,PlaceMarking]] ={//(Set[SToken],Set[DToken])]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
+    var nm:Map[Int,PlaceMarking] = Map()
     // for each place pl with non-empty marking tks
     for ((pl,tks) <- m; if (m.isDefinedAt(pl))) {
       // for each outgoing transition from pl
       for (t <- clpn.trs; if (t.from == pl)) {
         // for each simple token in (TODO:tks)
-        for (stk <- m(pl)._1) {
+        for (stk <- m(pl).st) {
           // get the current tokens in the target of t
-          var ct:(Set[SToken],Set[DToken]) = nm.getOrElse(t.to,(Set(),Set()))
+          var ct:PlaceMarking = nm.getOrElse(t.to,PlaceMarking(Set(),Set()))
           //fire t for the simple token
           var nt = t.fire(stk) // get token to add in target
           nt match {
-            case n:SToken     => nm = nm + (t.to -> (ct._1 ++ Set(n), ct._2)) // add simple token to target if it is simple
-            case DToken(tk,d)  => nm = nm + (t.to -> (ct._1 , ct._2 ++ Set(DToken(tk,d)))) // add dtoken to target if it is delay
+            case n:SToken     => nm = nm + (t.to -> PlaceMarking(ct.st ++ Set(n), ct.dt)) // add simple token to target if it is simple
+            case DToken(tk,d)  => nm = nm + (t.to -> PlaceMarking(ct.st , ct.dt ++ Set(DToken(tk,d)))) // add dtoken to target if it is delay
           }
         }
         // for each delay token in pl // TODO: fix, this has to be conducted once not for very transition (is a waist of computing)
-        for (dtk <- m(pl)._2 ) {
+        for (dtk <- m(pl).dt ) {
           // get the current token in pl (TODO:this is tks)
-          var ct:(Set[SToken],Set[DToken]) = nm.getOrElse(t.from, (Set(), Set()))
+          var ct:PlaceMarking = nm.getOrElse(t.from, PlaceMarking(Set(), Set()))
           dtk match {
-            case DToken(tk, 1) => nm = nm + (t.from -> (ct._1 ++ Set(tk), ct._2)) //transform token to active if delay0
-            case DToken(tk, n) => nm = nm + (t.from -> (ct._1, ct._2 ++ Set(DToken(tk, n - 1)))) // decrease the token
+            case DToken(tk, 1) => nm = nm + (t.from -> PlaceMarking(ct.st ++ Set(tk), ct.dt)) //transform token to active if delay0
+            case DToken(tk, n) => nm = nm + (t.from -> PlaceMarking(ct.st, ct.dt ++ Set(DToken(tk, n - 1)))) // decrease the token
           }
         }
       }
@@ -69,26 +70,26 @@ object ReachabilityGraph {
     expand(nm,conflictPlaces(nm))
   }
 
-  def enabled(m:Map[Int,(Set[SToken],Set[DToken])],clpn:CLPN):Set[Transition] = {
+  def enabled(m:Map[Int,PlaceMarking],cLPN: CLPN):Set[Transition] ={ //(Set[SToken],Set[DToken])],clpn:CLPN):Set[Transition] = {
     var res:Set[Transition] = Set()
-    for ((pl,tks) <-m; if (m(pl)._1.contains(Inc) || m(pl)._1.contains(Dec)))
-      for (t <- clpn.trs; if (t.from == pl)) res += t
+    for ((pl,pmrk) <-m; if (pmrk.enabled))
+      for (t <- cLPN.trs; if (t.from == pl)) res += t
     res
   }
 
-  def conflictPlaces(m:Map[Int,(Set[SToken],Set[DToken])]): List[Int] = {
-    (for (p <- m; if (p._2._1.size>1)) yield p._1).toList
+  def conflictPlaces(m:Map[Int,PlaceMarking]): List[Int] = {
+    (for ((p,pmrk) <- m; if pmrk.conflicting) yield p).toList
   }
 
-  def expand(m:Map[Int,(Set[SToken],Set[DToken])], cpls:List[Int]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
-    var res:Set[Map[Int,(Set[SToken],Set[DToken])]] = Set()
+  def expand(m:Map[Int,PlaceMarking], cpls:List[Int]): Set[Map[Int,PlaceMarking]] = {
+    var res:Set[Map[Int,PlaceMarking]] = Set()
     if (cpls.length>0){
       var p = cpls.head
       var cp = m(p)
       var nlist = cpls.slice(1,cpls.length-1)
       m - p
-      res = expand(m + (p -> (Set(Inc:SToken),cp._2)), nlist) ++
-        expand(m + (p -> (Set(Dec:SToken),cp._2)), nlist)
+      res = expand(m + (p -> PlaceMarking(Set(Inc),cp.dt)), nlist) ++
+        expand(m + (p -> PlaceMarking(Set(Dec),cp.dt)), nlist)
     } else res = Set(m)
     res
   }
@@ -100,7 +101,7 @@ object ReachabilityGraph {
   * @param tr transitions between states ids
   * @param m mapping between states ids and the marking associated to that state.
   */
-case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,(Set[SToken],Set[DToken])]]){}
+case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,PlaceMarking]]){}
 
 /**
   * Transitios for a reachability graph
