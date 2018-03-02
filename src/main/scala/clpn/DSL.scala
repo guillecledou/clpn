@@ -1,5 +1,8 @@
 package clpn
 
+import clpn._
+import clpn.analysis.ReachGraph
+
 object DSL {
 
   class TPlace(i:Int) {
@@ -11,5 +14,7 @@ object DSL {
 
   val newclpn = CLPN(Set(),Set(),Map())
 
-  def beh2Dot = clpn.backend.Dot
+  def toDot(cLPN: CLPN) = clpn.backend.Dot(cLPN)
+  def reach2dot(cLPN:CLPN) = clpn.backend.Dot(cLPN,cLPN.behavior)
+
 }

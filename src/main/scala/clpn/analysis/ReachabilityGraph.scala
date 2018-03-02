@@ -8,16 +8,13 @@ object ReachabilityGraph {
 
   def apply(clpn:CLPN): ReachGraph = {
     var sts:Set[Int]= Set(0)
-//    var tr: Set[(Int,Int)] = Set()
     var tr:Set[rgTrans] = Set()
-    //var cSt:Int= 0
     var cStNewNumber:Int= 0
     var cMrk = clpn.m
     var stMrk: Map[Int, Map[Int, (Set[SToken],Set[DToken])]] = Map(0 -> clpn.m)
     var toVisit:ListBuffer[Int] = ListBuffer(0)
     var newMrk:Set[Map[Int, (Set[SToken],Set[DToken])]] = Set()
     while (toVisit.nonEmpty) {
-      //      println(s"""To visit ${toVisit}""")
       var st = toVisit.head
       toVisit = toVisit.drop(1)
       cMrk = stMrk(st)
@@ -26,16 +23,12 @@ object ReachabilityGraph {
       for (nm <- newMrk) {
         stMrk.find({case (a,b) => b == nm}) match {
           case Some((stn,marking)) => {
-            //            println(s"""Existing state found ${nm}""")
             tr += rgTrans(st,enabledT,stn)
-            //            println(s"""new transition to old state ${tr}""")
           }
           case None => {
-            //            println(s"""New state found ${nm}""")
             cStNewNumber+=1
             tr += rgTrans(st,enabledT,cStNewNumber)
             stMrk += (cStNewNumber -> nm)
-            //            println(s"""New state to visit ${cStNewNumber}""")
             toVisit += cStNewNumber
             sts+=cStNewNumber
           }
@@ -47,8 +40,6 @@ object ReachabilityGraph {
 
    def update(clpn:CLPN,m:Map[Int,(Set[SToken],Set[DToken])]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
     var nm:Map[Int,(Set[SToken],Set[DToken])] = Map()
-//    var stoken: Set[Token] = Set()
-    //var enabledt: Set[Transition] = Set()
     // for each place pl with non-empty marking tks
     for ((pl,tks) <- m; if (m.isDefinedAt(pl))) {
       // for each outgoing transition from pl
@@ -102,5 +93,19 @@ object ReachabilityGraph {
     res
   }
 }
+
+/**
+  * Reachability Graph
+  * @param sts states ids
+  * @param tr transitions between states ids
+  * @param m mapping between states ids and the marking associated to that state.
+  */
 case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,(Set[SToken],Set[DToken])]]){}
+
+/**
+  * Transitios for a reachability graph
+  * @param from id of the origin state
+  * @param name transition name. Corresponds to the name off all enabled transitions at the origin state
+  * @param to id of the target state
+  */
 case class rgTrans(from:Int,name:String,to:Int){}
