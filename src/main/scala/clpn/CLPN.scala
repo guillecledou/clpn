@@ -9,7 +9,12 @@ import clpn.backend.Show
   */
 
 
-
+/**
+  * A causal loop petri net
+  * @param pls places
+  * @param trs transitions between places
+  * @param m initial marking
+  */
 case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(Set[SToken],Set[DToken])]){
 
   private def linkT(t:Transition):CLPN =
@@ -36,6 +41,11 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(
 }
 
 
+/**
+  * Marking for a place
+  * @param st set of elementary tokens
+  * @param dt set of delay tokens
+  */
 case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
 
   def enabled = st.nonEmpty
@@ -43,22 +53,14 @@ case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
   def conflicting = st.contains(Inc) && st.contains(Dec)
 }
 
-
-//case class ReachGraph(sts:Set[Int], tr:Set[(Int,Int)], m:Map[Int,Map[Int,(Set[SToken],Set[DToken])]]){
-
-
-//}
-
-
-/*
-case class Place(id:Int,t:Set[Token],dt:Set[DToken]) {
-
-}
-*/
-
-
-
-
+/**
+  * Transition of a causal loop petri net
+  * @param from
+  * @param name
+  * @param polarity
+  * @param delay
+  * @param to
+  */
 case class Transition(from:Int,name:String,polarity:Polarity,delay:Int,to:Int){
 
   def fire(t:SToken):Token =

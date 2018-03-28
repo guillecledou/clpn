@@ -7,23 +7,11 @@ import clpn._
   */
 object BasicExamples {
 
-  implicit def setTkToPMarking(tks:Set[Token]):PlaceMarking = {
-    var st:Set[SToken] = Set()
-    var dt:Set[DToken] = Set()
-    for (tk <- tks) {
-      tk match {
-        case t:SToken => st += t
-        case t:DToken => dt += t
-      }
-    }
-    new PlaceMarking(st,dt)
-  }
-
   // Bank balance and Intersts earned
   var bb = newclpn ++ (
     0 -->+ 1,
     1 -->+ 0
-  ) initial((0, Set(Inc))
+  ) //initial((0, Set(Inc))
 
   // Random example
   var ex = newclpn ++ (

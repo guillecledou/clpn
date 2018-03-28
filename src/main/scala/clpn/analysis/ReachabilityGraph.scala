@@ -45,8 +45,8 @@ object ReachabilityGraph {
     for ((pl,tks) <- m; if (m.isDefinedAt(pl))) {
       // for each outgoing transition from pl
       for (t <- clpn.trs; if (t.from == pl)) {
-        // for each simple token in (TODO:tks)
-        for (stk <- m(pl).st) {
+        // for each simple token in tks
+        for (stk <- tks.st) {
           // get the current tokens in the target of t
           var ct:PlaceMarking = nm.getOrElse(t.to,PlaceMarking(Set(),Set()))
           //fire t for the simple token
@@ -56,14 +56,14 @@ object ReachabilityGraph {
             case DToken(tk,d)  => nm = nm + (t.to -> PlaceMarking(ct.st , ct.dt ++ Set(DToken(tk,d)))) // add dtoken to target if it is delay
           }
         }
-        // for each delay token in pl // TODO: fix, this has to be conducted once not for very transition (is a waist of computing)
-        for (dtk <- m(pl).dt ) {
-          // get the current token in pl (TODO:this is tks)
-          var ct:PlaceMarking = nm.getOrElse(t.from, PlaceMarking(Set(), Set()))
-          dtk match {
-            case DToken(tk, 1) => nm = nm + (t.from -> PlaceMarking(ct.st ++ Set(tk), ct.dt)) //transform token to active if delay0
-            case DToken(tk, n) => nm = nm + (t.from -> PlaceMarking(ct.st, ct.dt ++ Set(DToken(tk, n - 1)))) // decrease the token
-          }
+      }
+      // for each delay token in pl // TODO: fix, this has to be conducted once not for very transition (is a waist of computing)
+      for (dtk <- m(pl).dt ) {
+        // get the current token in pl
+        var ct:PlaceMarking = nm.getOrElse(pl, PlaceMarking(Set(), Set()))
+        dtk match {
+          case DToken(tk, 1) => nm = nm + (pl -> PlaceMarking(ct.st ++ Set(tk), ct.dt)) //transform token to active if delay0
+          case DToken(tk, n) => nm = nm + (pl -> PlaceMarking(ct.st, ct.dt ++ Set(DToken(tk, n - 1)))) // decrease the token
         }
       }
     }
