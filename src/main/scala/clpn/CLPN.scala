@@ -29,7 +29,7 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(
   private def linkMrks(mk:(Int, PlaceMarking)) = //(Set[SToken], Set[DToken])]) =
     CLPN(pls,trs,m+(mk._1 -> mk._2))
 
-  def initial(mks:(Int, PlaceMarking)*):CLPN ={ //(Set[SToken],Set[DToken])]*):CLPN ={
+  def initMark(mks:(Int, PlaceMarking)*):CLPN ={ //(Set[SToken],Set[DToken])]*):CLPN ={
     var res = this
     for (mk <- mks) res = res linkMrks mk
     res

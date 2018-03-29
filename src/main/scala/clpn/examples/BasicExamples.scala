@@ -2,16 +2,17 @@ package clpn.examples
 
 import clpn.DSL._
 import clpn._
+
 /**
   * Basic examples of CLD diagrams taken from the literature
   */
 object BasicExamples {
 
-  // Bank balance and Intersts earned
+  // Bank balance and Interests earned
   var bb = newclpn ++ (
     0 -->+ 1,
     1 -->+ 0
-  ) //initial((0, Set(Inc))
+  ) initMark((0, mk(Set(Inc))))
 
   // Random example
   var ex = newclpn ++ (

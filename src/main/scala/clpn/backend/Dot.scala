@@ -7,12 +7,26 @@ object Dot {
 
   /**
     * Converts a ReachGraph into a dot graph (graphviz)
-    * @param rg reachability graph
     * @return dot graph in string
     */
-  def apply(clpn:CLPN,rg:ReachGraph): String = {
+  def toDotRG(clpn:CLPN): String = {
+    var rg = clpn.behavior
     "digraph G {\n" +
       toDotMarkings(clpn.pls,rg.m) +
+      rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
+      "}"
+  }
+
+  /**
+    * Converts a ReachGraph into a dot graph (graphviz) projecting only the variables in places
+    * @param clpn causal loop net (containing its reachability graph
+    * @param places places to include in the reachability graph
+    * @return
+    */
+  def toDotRG(clpn:CLPN,places:Set[Int]): String = {
+    var rg = clpn.behavior
+    "digraph G {\n" +
+      toDotMarkings(clpn.pls intersect places,rg.m) +
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
       "}"
   }

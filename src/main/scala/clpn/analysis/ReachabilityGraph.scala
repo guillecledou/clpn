@@ -101,7 +101,12 @@ object ReachabilityGraph {
   * @param tr transitions between states ids
   * @param m mapping between states ids and the marking associated to that state.
   */
-case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,PlaceMarking]]){}
+case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,PlaceMarking]]){
+
+//  def project(places:Set[Int]): ReachGraph =
+//    ReachGraph(sts,tr,m.mapValues(mk => mk.filter(p => places.contains(p._1))))
+//
+}
 
 /**
   * Transitios for a reachability graph
