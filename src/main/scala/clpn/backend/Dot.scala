@@ -63,8 +63,8 @@ object Dot {
       res append s"""{node [label=""""
       var strPlaces:List[String] = List()
       for (p <- pls.toList.sorted) {
-        var cmrk = mrk.getOrElse(p, PlaceMarking(Set(), Set()))
-        strPlaces = strPlaces ++ List(toDotMarking(cmrk.st ++ cmrk.dt))
+        var cmrk = mrk.getOrElse(p, PlaceMarking(Set()))
+        strPlaces = strPlaces ++ List(toDotMarking(cmrk.tks))
       }
       res append strPlaces.mkString(",") + s""""] ${st}}\n"""
     }

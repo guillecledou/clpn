@@ -43,14 +43,19 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(
 
 /**
   * Marking for a place
-  * @param st set of elementary tokens
-  * @param dt set of delay tokens
   */
-case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
+case class PlaceMarking(tks:Set[Token]){
 
-  def enabled = st.nonEmpty
+  lazy val stks:Set[Token] = {
+    var st:Set[Token] = tks.filter(t => (t == Inc) || (t == Dec) || (t == NC))
+    if (st.isEmpty) Set(NC) else st
+  }
 
-  def conflicting = st.contains(Inc) && st.contains(Dec)
+  lazy val dtks:Set[Token] = tks.filterNot(t => stks.contains(t))
+
+  def enabled = stks.nonEmpty
+
+  def conflicting = stks.contains(Inc) && stks.contains(Dec)
 }
 
 /**
@@ -63,11 +68,13 @@ case class PlaceMarking(st:Set[SToken],dt:Set[DToken]){
   */
 case class Transition(from:Int,name:String,polarity:Polarity,delay:Int,to:Int){
 
-  def fire(t:SToken):Token =
+  def fire(t:Token):Token =
     (t,delay) match {
-      case (n:SToken,0) => n * polarity
-      case (n:SToken,d) => DToken(n * polarity,d)
-      //case (DToken(t_,_),_) => throw new IllegalArgumentException("Delay tokens can not be fired")
+      case (Inc,0) => Inc * polarity
+      case (Dec,0) => Dec * polarity
+      case (Inc,d) => DInc(d) * polarity
+      case (Dec,d) => DDec(d) * polarity
+      case (_,_) => throw new IllegalArgumentException("Delay tokens and no change tokens can not be fired")
     }
 
   def in(d:Int) = Transition(from,name,polarity,d,to)

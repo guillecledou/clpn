@@ -12,7 +12,7 @@ object BasicExamples {
   var bb = newclpn ++ (
     0 -->+ 1,
     1 -->+ 0
-  ) initMark((0, mk(Set(Inc))))
+  ) initMark((0, Set(1)))
 
   // Random example
   var ex = newclpn ++ (

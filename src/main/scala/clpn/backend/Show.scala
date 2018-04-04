@@ -7,7 +7,9 @@ object Show{
     tk match {
       case Inc => "1"
       case Dec => "-1"
-      case DToken(t,d) => s"$t($d)"
+      case NC => "-"
+      case DInc(d) => s"1($d)"
+      case DDec(d) => s"-1($d)"
     }
 
   def apply(p:Polarity): String =
@@ -38,11 +40,10 @@ object Show{
 //  }
 
   def apply(mks:Map[Int,PlaceMarking]):String ={
-    mks.map(mk => mkPlaceMarking(mk._1,mk._2.st,mk._2.dt)).mkString("[","|","]")
+    mks.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("[","|","]")
   }
 
-  def mkPlaceMarking(p:Int, stk:Set[SToken], dtk:Set[DToken]):String = {
-    var tks:Set[Token] = stk ++ dtk
+  def mkPlaceMarking(p:Int, tks:Set[Token]):String = {
     s"$p -> " + tks.map(tk => Show(tk)).mkString("{",",","}")
 
   }

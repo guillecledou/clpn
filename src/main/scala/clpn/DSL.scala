@@ -11,17 +11,17 @@ object DSL {
     def -->-(other:Int):Transition = Transition(i,"",Neg,0,other)
   }
 
-  def mk(tks:Set[Token]):PlaceMarking = {
-    var st:Set[SToken] = Set()
-    var dt:Set[DToken] = Set()
+  implicit def intToPMarking(tks:Set[Int]):PlaceMarking = {
+    var ntks:Set[Token] = Set()
     for (tk <- tks) {
       tk match {
-        case Inc => st = st + Inc
-        case Dec => st = st + Dec
-        case DToken(t,d) => dt = dt + DToken(t,d)
+        case 1  => ntks += Inc
+        case -1 => ntks += Dec
+        case 0  =>
+        case _ => throw new IllegalArgumentException("Only simple tokens can be assign to an initial marking")
       }
     }
-    new PlaceMarking(st,dt)
+    new PlaceMarking(ntks)
   }
 
   implicit def intToTPlace(i:Int): TPlace = new TPlace(i)
