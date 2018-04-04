@@ -22,6 +22,7 @@ sealed trait SToken extends Token{
 
 case object Inc extends SToken
 case object Dec extends SToken
+//case object NC  extends SToken
 
 case class DToken(t:SToken,delay:Int) extends Token{
 

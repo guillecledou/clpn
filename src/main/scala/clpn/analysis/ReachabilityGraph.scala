@@ -36,7 +36,7 @@ object ReachabilityGraph {
         }
       }
     }
-    ReachGraph(sts,tr,stMrk)
+    ReachGraph(sts,0,tr,stMrk)
   }
 
    def update(clpn:CLPN,m:Map[Int,PlaceMarking]):Set[Map[Int,PlaceMarking]] ={//(Set[SToken],Set[DToken])]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
@@ -101,11 +101,13 @@ object ReachabilityGraph {
   * @param tr transitions between states ids
   * @param m mapping between states ids and the marking associated to that state.
   */
-case class ReachGraph(sts:Set[Int], tr:Set[rgTrans], m:Map[Int,Map[Int,PlaceMarking]]){
+case class ReachGraph(sts:Set[Int],s0:Int, tr:Set[rgTrans], m:Map[Int,Map[Int,PlaceMarking]]){
 
-//  def project(places:Set[Int]): ReachGraph =
-//    ReachGraph(sts,tr,m.mapValues(mk => mk.filter(p => places.contains(p._1))))
-//
+  def project(places:Set[Int]): ReachGraph =
+    ReachGraph(sts,s0,tr,m.mapValues(mk => mk.filter(p => places.contains(p._1))))
+
+  def post(st:Int):Set[Int] = tr.filter(_.from == st).map(t => t.to)
+
 }
 
 /**
