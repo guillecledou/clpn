@@ -53,7 +53,7 @@ case class PlaceMarking(tks:Set[Token]){
 
   lazy val dtks:Set[Token] = tks.filterNot(t => stks.contains(t))
 
-  def enabled = stks.nonEmpty
+  def enabled = stks.contains(Inc) || stks.contains(Dec) //stks.nonEmpty
 
   def conflicting = stks.contains(Inc) && stks.contains(Dec)
 }

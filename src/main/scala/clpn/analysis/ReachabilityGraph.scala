@@ -46,7 +46,7 @@ object ReachabilityGraph {
       // for each outgoing transition from pl
       for (t <- clpn.trs; if (t.from == pl)) {
         // for each simple token in tks
-        for (stk <- tks.stks) {
+        for (stk <- tks.stks - NC) {
           // get the current tokens in the target of t
           var ct:PlaceMarking = nm.getOrElse(t.to,PlaceMarking(Set()))
           //fire t for the simple token
