@@ -2,6 +2,8 @@ package clpn.analysis
 
 import clpn.{CLPN, NC, PlaceMarking, Token}
 
+import scala.collection.mutable.ListBuffer
+
 
 object Verification {
 
@@ -13,8 +15,9 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]):Boolean = {
-    if (prop.isEmpty) true else {
+  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Int]) = {
+    if (prop.isEmpty) (true,List()) else {
+      var trace:ListBuffer[Int] = new ListBuffer()
       var found = false
       val rg = cLPN.behavior //.project(Set(v))
       var p = prop
@@ -25,31 +28,44 @@ object Verification {
         if (p.nonEmpty) {
           var cpm: PlaceMarking = rg.m(currentSt).getOrElse(v, PlaceMarking(Set(NC)))
           if (cpm.stks.contains(p.head)) {
+            trace += currentSt
             if (p.size == 1)
               found = true
             else {
               // check substring match
               var nextSts = rg.post(currentSt).toIterator
               while (nextSts.hasNext && !found) {
-                found = found || checkSubstring(rg, v, nextSts.next(), p.drop(1)) //, visited)
+//                var foundSub = false
+//                var subtrace:List[Int] = List()
+                val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), p.drop(1))
+//                found = found || foundSub  //, visited)
+                if (foundSub) {
+                  trace ++= subtrace
+                  found = true
+                }
               }
             }
           }
         }
+        if (!found) trace.clear()
         visited += currentSt
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      found
+      (found,trace.toList)
     }
   }
 
-  private def checkSubstring(rg:ReachGraph,v:Int,cSt: Int, cProp: List[Token]):Boolean ={ //, visited: Set[Int]): Boolean = {
+
+
+  private def checkSubstring(rg:ReachGraph,v:Int,cSt: Int, cProp: List[Token]):(Boolean,List[Int])={ //, visited: Set[Int]): Boolean = {
     var found = false
     var nProp = cProp
+    var trace: ListBuffer[Int] = new ListBuffer[Int]
     if (nProp.nonEmpty) {
       var cpm:PlaceMarking = rg.m(cSt).getOrElse(v, PlaceMarking(Set(NC)))
       if ((cpm.stks.contains(nProp.head))) {
+        trace += cSt
         if (nProp.size == 1) {
           found = true
         }
@@ -57,14 +73,29 @@ object Verification {
           nProp = nProp.drop(1)
           var nextSts = rg.post(cSt).toIterator
           while (nextSts.hasNext && !found) {
-            found = found || checkSubstring(rg, v, nextSts.next(), nProp) //, nVisited)
+//            var foundSub = false
+//            var subtrace: List[Int] = List()
+            val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), nProp) //, nVisited)
+            //              found = found ||
+            if (foundSub) {
+              trace ++= subtrace
+              found = true
+            }
           }
         }
       }
     } else found = true
-    found
+    (found, trace.toList)
   }
 
+  /**
+    * It verifies if a property is satisfied always, i.e. if whenever prop.head appears
+    * it always follows prop.tail
+    * @param cLPN
+    * @param v
+    * @param prop
+    * @return
+    */
   def always(cLPN: CLPN,v:Int,prop:List[Token]):Boolean = {
     if (prop.isEmpty) true else {
       var found = false
