@@ -15,7 +15,7 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Int]) = {
+  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Map[Int,PlaceMarking]]) = {
     if (prop.isEmpty) (true,List()) else {
       var trace:ListBuffer[Int] = new ListBuffer()
       var found = false
@@ -52,7 +52,7 @@ object Verification {
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      (found,trace.toList)
+      (found,trace.map(x => rg.m(x)).toList)
     }
   }
 

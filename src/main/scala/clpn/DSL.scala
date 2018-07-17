@@ -18,7 +18,7 @@ object DSL {
         case 1  => ntks += Inc
         case -1 => ntks += Dec
         case 0  =>
-        case _ => throw new IllegalArgumentException("Only simple tokens can be assign to an initial marking")
+        case _ => throw new IllegalArgumentException("Only simple tokens can be assigned to an initial marking")
       }
     }
     new PlaceMarking(ntks)

@@ -40,11 +40,12 @@ object Show{
 //  }
 
   def apply(mks:Map[Int,PlaceMarking]):String ={
-    mks.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("[","|","]")
+    mks.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("["," | ","]")
   }
 
   def mkPlaceMarking(p:Int, tks:Set[Token]):String = {
     s"$p -> " + tks.map(tk => Show(tk)).mkString("{",",","}")
 
   }
+
 }
