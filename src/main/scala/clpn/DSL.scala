@@ -26,7 +26,7 @@ object DSL {
 
   implicit def intToTPlace(i:Int): TPlace = new TPlace(i)
 
-  val newclpn = CLPN(Set(),Set(),Map())
+  val newclpn = CLPN(Set(),Set(),Marking(Map()))
 
   def toDot(cLPN: CLPN) = clpn.backend.Dot(cLPN)
   def reach2dot(cLPN:CLPN) = clpn.backend.Dot.toDotRG(cLPN)

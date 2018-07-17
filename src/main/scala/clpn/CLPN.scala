@@ -15,7 +15,7 @@ import clpn.backend.Show
   * @param trs transitions between places
   * @param m initial marking
   */
-case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(Set[SToken],Set[DToken])]){
+case class CLPN(pls:Set[Int], trs:Set[Transition],m:Marking){ //Map[Int, PlaceMarking]){ //(Set[SToken],Set[DToken])]){
 
   private def linkT(t:Transition):CLPN =
     CLPN(pls+t.from+t.to,trs+t,m)
@@ -27,7 +27,7 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(
   }
 
   private def linkMrks(mk:(Int, PlaceMarking)) = //(Set[SToken], Set[DToken])]) =
-    CLPN(pls,trs,m+(mk._1 -> mk._2))
+    CLPN(pls,trs,m+(mk)) //CLPN(pls,trs,m+(mk._1 -> mk._2))
 
   def initMark(mks:(Int, PlaceMarking)*):CLPN ={ //(Set[SToken],Set[DToken])]*):CLPN ={
     var res = this
@@ -41,9 +41,16 @@ case class CLPN(pls:Set[Int], trs:Set[Transition],m:Map[Int, PlaceMarking]){ //(
 }
 
 
-/**
-  * Marking for a place
-  */
+case class Marking(mrk:Map[Int,PlaceMarking]){
+
+  def +(pm:(Int,PlaceMarking)): Marking = {
+    Marking(this.mrk+(pm._1 -> pm._2))
+  }
+
+  override def toString: String = Show(this)
+}
+
+// Marking for a place
 case class PlaceMarking(tks:Set[Token]){
 
   lazy val stks:Set[Token] = {
@@ -80,11 +87,6 @@ case class Transition(from:Int,name:String,polarity:Polarity,delay:Int,to:Int){
   def in(d:Int) = Transition(from,name,polarity,d,to)
   def by(s:String) = Transition(from,s,polarity,delay,to)
 }
-/*
-case class Marking(m:Map[Int,Set[Token]]) {
-
-}
-*/
 
 sealed trait Polarity{
   override def toString: String = Show(this)

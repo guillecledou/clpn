@@ -1,6 +1,6 @@
 package clpn.analysis
 
-import clpn.{CLPN, NC, PlaceMarking, Token}
+import clpn._
 
 import scala.collection.mutable.ListBuffer
 
@@ -15,7 +15,7 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Map[Int,PlaceMarking]]) = {
+  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Marking]) = {
     if (prop.isEmpty) (true,List()) else {
       var trace:ListBuffer[Int] = new ListBuffer()
       var found = false
@@ -26,7 +26,7 @@ object Verification {
       while (toVisit.nonEmpty && !found) {
         var currentSt = toVisit.head
         if (p.nonEmpty) {
-          var cpm: PlaceMarking = rg.m(currentSt).getOrElse(v, PlaceMarking(Set(NC)))
+          var cpm: PlaceMarking = rg.m(currentSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
           if (cpm.stks.contains(p.head)) {
             trace += currentSt
             if (p.size == 1)
@@ -63,7 +63,7 @@ object Verification {
     var nProp = cProp
     var trace: ListBuffer[Int] = new ListBuffer[Int]
     if (nProp.nonEmpty) {
-      var cpm:PlaceMarking = rg.m(cSt).getOrElse(v, PlaceMarking(Set(NC)))
+      var cpm:PlaceMarking = rg.m(cSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
       if ((cpm.stks.contains(nProp.head))) {
         trace += cSt
         if (nProp.size == 1) {
@@ -106,7 +106,7 @@ object Verification {
       while (toVisit.nonEmpty && !found) {
         var currentSt = toVisit.head
         if (p.nonEmpty) {
-          var cpm: PlaceMarking = rg.m(currentSt).getOrElse(v, PlaceMarking(Set(NC)))
+          var cpm: PlaceMarking = rg.m(currentSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
           if (cpm.stks.contains(p.head)) {
             if (p.size == 1)
               found = true
@@ -134,7 +134,7 @@ object Verification {
     var found = false
     var nProp = cProp
     if (nProp.nonEmpty) {
-      var cpm:PlaceMarking = rg.m(cSt).getOrElse(v, PlaceMarking(Set(NC)))
+      var cpm:PlaceMarking = rg.m(cSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
       if ((cpm.stks.contains(nProp.head))) {
         if (nProp.size == 1) {
           found = true

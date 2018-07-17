@@ -22,7 +22,6 @@ object Show{
     s"""CLPN [${pn.pls.mkString("",",","")}] """ +
     Show(pn.m) +
     pn.trs.map(t => "\n " + Show(t)).mkString("")
-
   }
 
   private def trDelay(delay: Int) =
@@ -35,17 +34,15 @@ object Show{
     s"""${tr.from} -${trDelay(tr.delay)}->${tr.polarity} ${tr.to}${trName(tr.name)}"""
   }
 
-//  def apply(mks:Map[Int, (Set[SToken],Set[DToken])]): String = {
-//    mks.map(mk => mkPlaceMarking(mk._1,mk._2._1,mk._2._2)).mkString("["," | ","]")
-//  }
-
-  def apply(mks:Map[Int,PlaceMarking]):String ={
-    mks.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("["," | ","]")
+  def apply(m:Marking):String ={
+    m.mrk.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("["," | ","]")
   }
+
+//  def apply(mks:Map[Int,PlaceMarking]):String ={
+//    mks.map(mk => mkPlaceMarking(mk._1,mk._2.tks)).mkString("["," | ","]")
+//  }
 
   def mkPlaceMarking(p:Int, tks:Set[Token]):String = {
     s"$p -> " + tks.map(tk => Show(tk)).mkString("{",",","}")
-
   }
-
 }

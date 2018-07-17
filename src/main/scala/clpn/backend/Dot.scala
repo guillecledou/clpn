@@ -57,13 +57,13 @@ object Dot {
     "\n" + toDotTransitions(clpn.trs) + "}"
   }
 
-  def toDotMarkings(pls:Set[Int],stsMrks:Map[Int,Map[Int,PlaceMarking]]):String = {
+  def toDotMarkings(pls:Set[Int],stsMrks:Map[Int,Marking]):String = {
     val res = new StringBuilder
     for ((st,mrk) <- stsMrks) {
       res append s"""{node [label=""""
       var strPlaces:List[String] = List()
       for (p <- pls.toList.sorted) {
-        var cmrk = mrk.getOrElse(p, PlaceMarking(Set()))
+        var cmrk = mrk.mrk.getOrElse(p, PlaceMarking(Set()))
         strPlaces = strPlaces ++ List(toDotMarking(cmrk.tks))
       }
       res append strPlaces.mkString(",") + s""""] ${st}}\n"""
