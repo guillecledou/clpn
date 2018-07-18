@@ -63,6 +63,8 @@ case class PlaceMarking(tks:Set[Token]){
   def enabled = stks.contains(Inc) || stks.contains(Dec) //stks.nonEmpty
 
   def conflicting = stks.contains(Inc) && stks.contains(Dec)
+
+  def noChanged = stks.equals(Set(NC))
 }
 
 /**

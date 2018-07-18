@@ -7,6 +7,75 @@ import scala.collection.mutable.ListBuffer
 
 object Verification {
 
+  def weakExists(cLPN: CLPN, v:Int, prop:List[Token]):(Boolean,List[Marking]) = {
+    if (prop.isEmpty) (true,List()) else {
+
+      var trace:List[Int] = List()
+      var found = false
+      var rg = cLPN.behavior
+      var visited:Set[Int] = Set()
+      var toVisit:Set[Int] = Set(rg.s0)
+//      var prop = property
+
+      while (toVisit.nonEmpty && !found){
+        var currentSt = toVisit.head
+//        if (prop.nonEmpty) {
+          var currentPM = rg.m(currentSt).mrk.getOrElse(v,PlaceMarking(Set(NC)))
+          if (currentPM.stks.contains(prop.head)) {
+            trace ++= List(currentSt)
+//            if (prop.size == 1) found = true
+            // check substring
+              var nextSts = rg.post(currentSt).toIterator
+              while (nextSts.hasNext && !found) {
+                val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop) // nodrop in prop
+                if (foundSub) {
+                  trace ++= subTrace
+                  found = true
+                }
+              }
+          }
+//        }
+        if (!found) trace = List()
+        visited += currentSt
+        toVisit ++= rg.post(currentSt)
+        toVisit = toVisit -- visited
+      }
+      (found,trace.map(x => rg.m(x)))
+    }
+  }
+
+  def checkWeakSubstring(rg:ReachGraph, v: Int, st: Int, prop: List[Token]): (Boolean,List[Int]) = {
+    var found = false
+    var trace:List[Int] = List()
+    if (prop.nonEmpty) {
+      var currentPM = rg.m(st).mrk.getOrElse(v,PlaceMarking(Set(NC)))
+      if (currentPM.stks.contains(prop.head) || currentPM.noChanged) {
+        trace ++= List(st)
+        var nextSts = (rg.post(st) - st).toIterator
+        while (nextSts.hasNext && !found) {
+          val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop)
+          if (foundSub) {
+            trace ++= subTrace
+            found = true
+          }
+        }
+      }else
+        if (prop.size == 1) found = true
+        else if (currentPM.stks.contains(prop.drop(1).head)) {
+          trace ++= List(st)
+          var nextSts = (rg.post(st) - st).toIterator
+          while (nextSts.hasNext && !found) {
+            val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop.drop(1))
+            if (foundSub) {
+              trace ++= subTrace
+              found = true
+            }
+          }
+        }
+    } else found = true
+    (found,trace)
+  }
+
   /**
     * Verifies if property prop is satisfied at some point in the reachability graph of cLPN
     *
@@ -15,7 +84,7 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]):(Boolean,List[Marking]) = {
+  def exists(cLPN: CLPN,v:Int,prop:List[Token]) :(Boolean,List[Marking]) = {
     if (prop.isEmpty) (true,List()) else {
       var trace:ListBuffer[Int] = new ListBuffer()
       var found = false
@@ -55,8 +124,6 @@ object Verification {
       (found,trace.map(x => rg.m(x)).toList)
     }
   }
-
-
 
   private def checkSubstring(rg:ReachGraph,v:Int,cSt: Int, cProp: List[Token]):(Boolean,List[Int])={ //, visited: Set[Int]): Boolean = {
     var found = false
