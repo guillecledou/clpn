@@ -9,22 +9,17 @@ object Verification {
 
   def weakExists(cLPN: CLPN, v:Int, prop:List[Token]):(Boolean,List[Int]) = {
     if (prop.isEmpty) (true,List()) else {
-
       var trace:List[Int] = List()
       var found = false
       var rg = cLPN.behavior
       var visited:Set[Int] = Set()
       var toVisit:Set[Int] = Set(rg.s0)
-//      var prop = property
 
       while (toVisit.nonEmpty && !found){
         var currentSt = toVisit.head
-//        if (prop.nonEmpty) {
           var currentPM = rg.m(currentSt).mrk.getOrElse(v,PlaceMarking(Set(NC)))
           if (currentPM.stks.contains(prop.head)) {
             trace ++= List(currentSt)
-//            if (prop.size == 1) found = true
-            // check substring
               var nextSts = rg.post(currentSt).toIterator
               while (nextSts.hasNext && !found) {
                 val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop,Set(currentSt)) // nodrop in prop
@@ -34,7 +29,7 @@ object Verification {
                 }
               }
           }
-//        }
+
         if (!found) trace = List()
         visited += currentSt
         toVisit ++= rg.post(currentSt)
@@ -96,29 +91,27 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]) :(Boolean,List[Marking]) = {
+  def exists(cLPN: CLPN,v:Int,prop:List[Token]) :(Boolean,List[Int]) = {
     if (prop.isEmpty) (true,List()) else {
-      var trace:ListBuffer[Int] = new ListBuffer()
+      var trace:List[Int] = List()
       var found = false
       val rg = cLPN.behavior //.project(Set(v))
-      var p = prop
       var visited: Set[Int] = Set()
       var toVisit: Set[Int] = Set(rg.s0)
+
       while (toVisit.nonEmpty && !found) {
         var currentSt = toVisit.head
-        if (p.nonEmpty) {
-          var cpm: PlaceMarking = rg.m(currentSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
-          if (cpm.stks.contains(p.head)) {
-            trace += currentSt
-            if (p.size == 1)
+        if (prop.nonEmpty) {
+          var currentPM = rg.m(currentSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
+          if (currentPM.stks.contains(prop.head)) {
+            trace ++= List(currentSt)
+            if (prop.size == 1)
               found = true
             else {
               // check substring match
               var nextSts = rg.post(currentSt).toIterator
               while (nextSts.hasNext && !found) {
-//                var foundSub = false
-//                var subtrace:List[Int] = List()
-                val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), p.drop(1))
+                val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), prop.drop(1))
 //                found = found || foundSub  //, visited)
                 if (foundSub) {
                   trace ++= subtrace
@@ -128,33 +121,29 @@ object Verification {
             }
           }
         }
-        if (!found) trace.clear()
+        if (!found) trace = List()
         visited += currentSt
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      (found,trace.map(x => rg.m(x)).toList)
+      (found, trace)//(found,trace.map(x => rg.m(x)).toList)
     }
   }
 
-  private def checkSubstring(rg:ReachGraph,v:Int,cSt: Int, cProp: List[Token]):(Boolean,List[Int])={ //, visited: Set[Int]): Boolean = {
+  private def checkSubstring(rg:ReachGraph,v:Int,cSt: Int, prop: List[Token]):(Boolean,List[Int])={ //, visited: Set[Int]): Boolean = {
     var found = false
-    var nProp = cProp
-    var trace: ListBuffer[Int] = new ListBuffer[Int]
-    if (nProp.nonEmpty) {
+    var trace: List[Int] = List()
+
+    if (prop.nonEmpty) {
       var cpm:PlaceMarking = rg.m(cSt).mrk.getOrElse(v, PlaceMarking(Set(NC)))
-      if ((cpm.stks.contains(nProp.head))) {
-        trace += cSt
-        if (nProp.size == 1) {
+      if ((cpm.stks.contains(prop.head))) {
+        trace ++= List(cSt)
+        if (prop.size == 1) {
           found = true
-        }
-        else {
-          nProp = nProp.drop(1)
+        } else {
           var nextSts = rg.post(cSt).toIterator
           while (nextSts.hasNext && !found) {
-//            var foundSub = false
-//            var subtrace: List[Int] = List()
-            val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), nProp) //, nVisited)
+            val (foundSub, subtrace) = checkSubstring(rg, v, nextSts.next(), prop.drop(1)) //, nVisited)
             //              found = found ||
             if (foundSub) {
               trace ++= subtrace
@@ -164,7 +153,7 @@ object Verification {
         }
       }
     } else found = true
-    (found, trace.toList)
+    (found, trace)
   }
 
   /**
