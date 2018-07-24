@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 object Verification {
 
-  def weakExists(cLPN: CLPN, v:Int, prop:List[Token]):(Boolean,List[Marking]) = {
+  def weakExists(cLPN: CLPN, v:Int, prop:List[Token]):(Boolean,List[Int]) = {
     if (prop.isEmpty) (true,List()) else {
 
       var trace:List[Int] = List()
@@ -27,7 +27,7 @@ object Verification {
             // check substring
               var nextSts = rg.post(currentSt).toIterator
               while (nextSts.hasNext && !found) {
-                val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop) // nodrop in prop
+                val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop,Set(currentSt)) // nodrop in prop
                 if (foundSub) {
                   trace ++= subTrace
                   found = true
@@ -40,35 +40,47 @@ object Verification {
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      (found,trace.map(x => rg.m(x)))
+      (found, trace) //(found,trace.map(x => rg.m(x)))
     }
   }
 
-  def checkWeakSubstring(rg:ReachGraph, v: Int, st: Int, prop: List[Token]): (Boolean,List[Int]) = {
+  def checkWeakSubstring(rg:ReachGraph, v: Int, st: Int, prop: List[Token],visited:Set[Int]): (Boolean,List[Int]) = {
     var found = false
     var trace:List[Int] = List()
+    var visitedSameProp:Set[Int] = visited
+
     if (prop.nonEmpty) {
       var currentPM = rg.m(st).mrk.getOrElse(v,PlaceMarking(Set(NC)))
       if (currentPM.stks.contains(prop.head) || currentPM.noChanged) {
         trace ++= List(st)
-        var nextSts = (rg.post(st) - st).toIterator
-        while (nextSts.hasNext && !found) {
-          val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop)
-          if (foundSub) {
-            trace ++= subTrace
-            found = true
+        visitedSameProp += st
+        var nextSts = (rg.post(st) -- visitedSameProp).toIterator
+        if (!nextSts.hasNext){
+          if (prop.size == 1) found = true
+        }else {
+          while (nextSts.hasNext && !found) {
+            val (foundSub, subTrace) = checkWeakSubstring(rg, v, nextSts.next(), prop,visitedSameProp)
+            if (foundSub) {
+              trace ++= subTrace
+              found = true
+            }
           }
         }
       }else
         if (prop.size == 1) found = true
         else if (currentPM.stks.contains(prop.drop(1).head)) {
           trace ++= List(st)
-          var nextSts = (rg.post(st) - st).toIterator
-          while (nextSts.hasNext && !found) {
-            val (foundSub,subTrace) = checkWeakSubstring(rg,v,nextSts.next(),prop.drop(1))
-            if (foundSub) {
-              trace ++= subTrace
-              found = true
+          visitedSameProp = Set(st)
+          var nextSts = (rg.post(st) -- visited).toIterator
+          if (!nextSts.hasNext){
+            if (prop.size == 1) found = true
+          }else {
+            while (nextSts.hasNext && !found) {
+              val (foundSub, subTrace) = checkWeakSubstring(rg, v, nextSts.next(), prop.drop(1), visitedSameProp)
+              if (foundSub) {
+                trace ++= subTrace
+                found = true
+              }
             }
           }
         }
