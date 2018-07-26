@@ -1,7 +1,7 @@
 package clpn.backend
 
 import clpn._
-import clpn.analysis.ReachGraph
+import clpn.analysis.{ReachGraph, Trace}
 
 object Dot {
 
@@ -21,6 +21,32 @@ object Dot {
       toDotMarkings(rg.pls,rg.m) +
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
       "}"
+  }
+
+  def apply(rg:ReachGraph, t:Trace):String = {
+    "digraph G {\n" +
+      s"""label=<<B>Trace = ${t.sts.map(st => "st"+st).mkString(", ")}</B>>\n""" +
+      "labelloc=top" +
+      toDotMarkingsTrace(rg.pls,rg.m,t) +
+      rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
+    "}"
+  }
+
+  def toDotMarkingsTrace(pls: Set[Int], stsMrks: Map[Int, Marking], t: Trace) = {
+    val res = new StringBuilder
+    for ((st,mrk) <- stsMrks) {
+      if (t.sts.contains(st))
+        res append s"""{node [color="red",xlabel="st${st}",label=""""
+      else
+        res append s"""{node [xlabel="st${st}",label=""""
+      var strPlaces:List[String] = List()
+      for (p <- pls.toList.sorted) {
+        var cmrk = mrk.mrk.getOrElse(p, PlaceMarking(Set()))
+        strPlaces = strPlaces ++ List(toDotMarking(cmrk.tks))
+      }
+      res append strPlaces.mkString(",") + s""""] ${st}}\n"""
+    }
+    res.toString()
   }
 
   /**

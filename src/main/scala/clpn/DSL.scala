@@ -1,7 +1,7 @@
 package clpn
 
 import clpn._
-import clpn.analysis.ReachGraph
+import clpn.analysis.{ReachGraph, Trace}
 import clpn.Token
 
 object DSL {
@@ -29,8 +29,9 @@ object DSL {
   val newclpn = CLPN(Set(),Set(),Marking(Map()))
 
   def toDot(cLPN: CLPN) = clpn.backend.Dot(cLPN)
-  def toDot(rg:ReachGraph) = clpn.backend.Dot(rg)
-  def toDot(rg:ReachGraph,places:Set[Int]) = clpn.backend.Dot(rg,places)
+  def reach2dot(rg:ReachGraph) = clpn.backend.Dot(rg)
+  def reach2dot(rg:ReachGraph,places:Set[Int]) = clpn.backend.Dot(rg,places)
+  def trace2dot(rg:ReachGraph,trace:Trace) = clpn.backend.Dot(rg,trace)
 //  def reach2dot(cLPN:CLPN) = clpn.backend.Dot(cLPN.behavior)
 //  def reach2dot(cLPN:CLPN,places:Set[Int]) = clpn.backend.Dot.(cLPN.behavior,places)
 //  def project(cLPN:CLPN,places:Int) = clpn.backend.Dot(cLPN,cLPN.behavior,places)

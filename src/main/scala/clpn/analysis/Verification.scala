@@ -7,11 +7,11 @@ import scala.collection.mutable.ListBuffer
 
 object Verification {
 
-  def weakExists(cLPN: CLPN, v:Int, prop:List[Token]):(Boolean,List[Int]) = {
-    if (prop.isEmpty) (true,List()) else {
+  def weakExists(rg: ReachGraph, v:Int, prop:List[Token]):Trace= {
+    if (prop.isEmpty) (Trace(List())) else {
       var trace:List[Int] = List()
       var found = false
-      var rg = cLPN.behavior
+//      var rg = cLPN.behavior
       var visited:Set[Int] = Set()
       var toVisit:Set[Int] = Set(rg.s0)
 
@@ -35,11 +35,11 @@ object Verification {
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      (found, trace) //(found,trace.map(x => rg.m(x)))
+      Trace(trace) //(found,trace.map(x => rg.m(x)))
     }
   }
 
-  def checkWeakSubstring(rg:ReachGraph, v: Int, st: Int, prop: List[Token],visited:Set[Int]): (Boolean,List[Int]) = {
+  private def checkWeakSubstring(rg:ReachGraph, v: Int, st: Int, prop: List[Token],visited:Set[Int]): (Boolean,List[Int]) = {
     var found = false
     var trace:List[Int] = List()
     var visitedSameProp:Set[Int] = visited
@@ -91,11 +91,11 @@ object Verification {
     * @param prop the property to verify as a sequence of finite increases and decreases
     * @return whethere the reachability graph of v in cLPN satisfies prop
     */
-  def exists(cLPN: CLPN,v:Int,prop:List[Token]) :(Boolean,List[Int]) = {
-    if (prop.isEmpty) (true,List()) else {
+  def exists(rg: ReachGraph,v:Int,prop:List[Token]) :Trace = {
+    if (prop.isEmpty) Trace(List()) else {
       var trace:List[Int] = List()
       var found = false
-      val rg = cLPN.behavior //.project(Set(v))
+//      val rg = cLPN.behavior //.project(Set(v))
       var visited: Set[Int] = Set()
       var toVisit: Set[Int] = Set(rg.s0)
 
@@ -126,7 +126,7 @@ object Verification {
         toVisit ++= rg.post(currentSt)
         toVisit = toVisit -- visited
       }
-      (found, trace)//(found,trace.map(x => rg.m(x)).toList)
+      Trace(trace)//(found,trace.map(x => rg.m(x)).toList)
     }
   }
 
@@ -159,15 +159,15 @@ object Verification {
   /**
     * It verifies if a property is satisfied always, i.e. if whenever prop.head appears
     * it always follows prop.tail
-    * @param cLPN
+    * @param rg
     * @param v
     * @param prop
     * @return
     */
-  def always(cLPN: CLPN,v:Int,prop:List[Token]):Boolean = {
+  def always(rg:ReachGraph,v:Int,prop:List[Token]):Boolean = {
     if (prop.isEmpty) true else {
       var found = false
-      val rg = cLPN.behavior //.project(Set(v))
+//      val rg = cLPN.behavior //.project(Set(v))
       var p = prop
       var visited: Set[Int] = Set()
       var toVisit: Set[Int] = Set(rg.s0)
@@ -222,3 +222,5 @@ object Verification {
     found
   }
 }
+
+case class Trace(sts:List[Int]){}
