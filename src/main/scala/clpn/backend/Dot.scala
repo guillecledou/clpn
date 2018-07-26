@@ -5,28 +5,33 @@ import clpn.analysis.ReachGraph
 
 object Dot {
 
+  def apply(clpn:CLPN): String = {
+    "digraph G {\n" +
+      "rankdir=LR\n" +
+      clpn.pls.map(p => s"""{node [xlabel="${p}",label="",shape="circle"] ${p}}""").mkString("\n") +
+      "\n" + toDotTransitions(clpn.trs) + "}"
+  }
+
   /**
     * Converts a ReachGraph into a dot graph (graphviz)
     * @return dot graph in string
     */
-  def toDotRG(clpn:CLPN): String = {
-    var rg = clpn.behavior
+  def apply(rg:ReachGraph):String = {
     "digraph G {\n" +
-      toDotMarkings(clpn.pls,rg.m) +
+      toDotMarkings(rg.pls,rg.m) +
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
       "}"
   }
 
   /**
     * Converts a ReachGraph into a dot graph (graphviz) projecting only the variables in places
-    * @param clpn causal loop net (containing its reachability graph
+    * @param rg reachability graph
     * @param places places to include in the reachability graph
     * @return
     */
-  def toDotRG(clpn:CLPN,places:Set[Int]): String = {
-    var rg = clpn.behavior
+  def apply(rg:ReachGraph,places:Set[Int]): String = {
     "digraph G {\n" +
-      toDotMarkings(clpn.pls intersect places,rg.m) +
+      toDotMarkings(rg.pls intersect places,rg.m) +
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
       "}"
   }
@@ -43,18 +48,6 @@ object Dot {
       tarcs append s"""${t.from} -> ${name} -> ${t.to}\n"""
     }
     tnodes append tarcs
-  }
-
-//  def mkMarking(tks: (Set[SToken], Set[DToken])) = {
-//    var tokens = tks._1 ++ tk_2
-//
-//  }
-
-  def apply(clpn:CLPN): String = {
-    "digraph G {\n" +
-    "rankdir=LR\n" +
-    clpn.pls.map(p => s"""{node [xlabel="${p}",label="",shape="circle"] ${p}}""").mkString("\n") +
-    "\n" + toDotTransitions(clpn.trs) + "}"
   }
 
   def toDotMarkings(pls:Set[Int],stsMrks:Map[Int,Marking]):String = {

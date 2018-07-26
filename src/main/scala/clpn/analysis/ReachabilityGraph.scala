@@ -36,7 +36,7 @@ object ReachabilityGraph {
         }
       }
     }
-    ReachGraph(sts,0,tr,stMrk)
+    ReachGraph(sts,0,clpn.pls,tr,stMrk)
   }
 
    def update(clpn:CLPN,m:Marking):Set[Marking] ={//(Set[SToken],Set[DToken])]): Set[Map[Int,(Set[SToken],Set[DToken])]] = {
@@ -97,20 +97,22 @@ object ReachabilityGraph {
 /**
   * Reachability Graph
   * @param sts states ids
+  * @param pls places cover by the reachability graph
   * @param tr transitions between states ids
   * @param m mapping between states ids and the marking associated to that state.
   */
-case class ReachGraph(sts:Set[Int],s0:Int, tr:Set[rgTrans], m:Map[Int,Marking]){
+case class ReachGraph(sts:Set[Int],s0:Int, pls:Set[Int], tr:Set[rgTrans], m:Map[Int,Marking]){
 
   def project(places:Set[Int]): ReachGraph =
-    ReachGraph(sts,s0,tr,m.mapValues(mk => Marking(mk.mrk.filter(p => places.contains(p._1)))))
+    ReachGraph(sts,s0,places,tr,m.mapValues(mk => Marking(mk.mrk.filter(p => places.contains(p._1)))))
 
+  /* states reached directly from st */
   def post(st:Int):Set[Int] = tr.filter(_.from == st).map(t => t.to)
 
 }
 
 /**
-  * Transitios for a reachability graph
+  * Transitions for a reachability graph
   * @param from id of the origin state
   * @param name transition name. Corresponds to the name off all enabled transitions at the origin state
   * @param to id of the target state
