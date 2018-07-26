@@ -60,7 +60,7 @@ object Dot {
   def toDotMarkings(pls:Set[Int],stsMrks:Map[Int,Marking]):String = {
     val res = new StringBuilder
     for ((st,mrk) <- stsMrks) {
-      res append s"""{node [label=""""
+      res append s"""{node [xlabel="st${st}",label=""""
       var strPlaces:List[String] = List()
       for (p <- pls.toList.sorted) {
         var cmrk = mrk.mrk.getOrElse(p, PlaceMarking(Set()))
