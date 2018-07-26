@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 object Verification {
 
-  def weakExists(rg: ReachGraph, v:Int, prop:List[Token]):Trace= {
+  def relaxedExists(rg: ReachGraph, v:Int, prop:List[Token]):Trace= {
     if (prop.isEmpty) (Trace(List())) else {
       var trace:List[Int] = List()
       var found = false
