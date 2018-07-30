@@ -8,7 +8,7 @@ object Dot {
   def apply(clpn:CLPN): String = {
     "digraph G {\n" +
       "rankdir=LR\n" +
-      clpn.pls.map(p => s"""{node [xlabel="${p}",label="",shape="circle"] ${p}}""").mkString("\n") +
+      clpn.pls.map(p => s"""{node [xlabel="${p}",label="${mkClpnMarking(clpn,p)}",shape="circle"] ${p}}""").mkString("\n") +
       "\n" + toDotTransitions(clpn.trs) + "}"
   }
 
@@ -31,6 +31,10 @@ object Dot {
       rg.tr.map(t => s"""${t.from} -> ${t.to} [label="${t.name}"]""").mkString("\n") +
     "}"
   }
+
+  def mkClpnMarking(cLPN: CLPN,place:Int):String =
+    cLPN.m.mrk.getOrElse(place,PlaceMarking(Set())).stks.mkString("{",",","}")
+
 
   def toDotMarkingsTrace(pls: Set[Int], stsMrks: Map[Int, Marking], t: Trace) = {
     val res = new StringBuilder
